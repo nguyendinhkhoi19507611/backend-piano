@@ -1,4 +1,4 @@
-// models/Music.js - Music schema model for managing music library
+
 const mongoose = require('mongoose');
 
 const musicSchema = new mongoose.Schema({

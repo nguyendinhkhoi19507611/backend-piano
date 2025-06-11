@@ -1,4 +1,4 @@
-// routes/payment.js - Payment processing and transaction routes
+
 const express = require('express');
 const { authenticateToken, requireKYC } = require('../middleware/auth');
 const PaymentService = require('../services/paymentService');

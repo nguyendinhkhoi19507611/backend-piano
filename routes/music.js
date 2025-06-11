@@ -1,4 +1,4 @@
-// routes/music.js - Music library and search routes
+
 const express = require('express');
 const { authenticateToken, optionalAuth, requirePremium } = require('../middleware/auth');
 const Music = require('../models/Music');

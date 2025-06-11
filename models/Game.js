@@ -1,4 +1,4 @@
-// models/Game.js - Game session schema for tracking gameplay and rewards
+
 const mongoose = require('mongoose');
 
 const gameSchema = new mongoose.Schema({

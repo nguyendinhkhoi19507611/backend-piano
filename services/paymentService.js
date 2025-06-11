@@ -1,4 +1,4 @@
-// services/paymentService.js - Payment processing and financial operations
+
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const axios = require('axios');
 const Transaction = require('../models/Transaction');

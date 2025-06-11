@@ -1,4 +1,4 @@
-// models/Transaction.js - Transaction schema for financial operations
+
 const mongoose = require('mongoose');
 const crypto = require('crypto');
 

@@ -1,4 +1,4 @@
-// routes/game.js - Game session and gameplay routes
+
 const express = require('express');
 const { authenticateToken, userRateLimit, requireOwnership } = require('../middleware/auth');
 const GameService = require('../services/gameService');

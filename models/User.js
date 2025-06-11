@@ -1,4 +1,4 @@
-// models/User.js - User schema model for authentication and user management
+
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const validator = require('validator');

@@ -1,4 +1,4 @@
-// middleware/auth.js - JWT authentication and authorization middleware
+
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
