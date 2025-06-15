@@ -17,38 +17,98 @@ router.get('/search', optionalAuth, async (req, res) => {
       genre, 
       difficulty, 
       page = 1, 
-      limit = 20,
+      limit = 12,
       sort = 'popularity' 
     } = req.query;
+    const offset = (parseInt(page) - 1) * parseInt(limit);
+    console.log(offset, limit, page, q, genre, difficulty, sort);
 
     // Build search filters
     const filters = { status: 'published' };
-    const response = await axios.get(`${process.env.MUSIC_API_URL}/tracks/?client_id=${process.env.MUSIC_API_KEY}&format=json&limit=${limit}`);
-    console.log('Music API response:', response.data);
-    // tracks: response.data.results.map(track => ({
-    //  {
-    //   id: '168',
-    //   name: "J'm'e FPM",
-    //   duration: 183,
-    //   artist_id: '7',
-    //   artist_name: 'TriFace',
-    //   artist_idstr: 'triface',
-    //   album_name: 'Premiers Jets',
-    //   album_id: '24',
-    //   license_ccurl: '',
-    //   position: 1,
-    //   releasedate: '2004-12-17',
-    //   album_image: 'https://usercontent.jamendo.com?type=album&id=24&width=300&trackid=168',
-    //   audio: 'https://prod-1.storage.jamendo.com/?trackid=168&format=mp31&from=M6lbJk0IPDSiuWRYj2J54A%3D%3D%7CuGtSmpsZJ5Xu5uxtfwEyaQ%3D%3D',
-    //   audiodownload: 'https://prod-1.storage.jamendo.com/download/track/168/mp32/',
-    //   prourl: '',
-    //   shorturl: 'https://jamen.do/t/168',
-    //   shareurl: 'https://www.jamendo.com/track/168',
-    //   audiodownload_allowed: true,
-    //   image: 'https://usercontent.jamendo.com?type=album&id=24&width=300&trackid=168'
-    // },
+    const response = await axios.get(`${process.env.MUSIC_API_URL}/tracks/?client_id=${process.env.MUSIC_API_KEY}&format=json&limit=${limit}&offset=${offset}&namesearch=${q || ''}`);
+    
+    // const accessToken = process.env.MUSIC_API_ACCESS_TOKEN;
+    // const response = await axios.get(`${process.env.MUSIC_API_URL}/search?q=lofi&type=track&limit=${limit}`, {
+    //   headers: {
+    //     Authorization: `Bearer ${accessToken}`
+    //   }
+    // });
+
+    // console.log('Music API response:', response.data.tracks.items[0]);
+    // track
+  //   {
+  //     album_type: 'single',
+  //     artists: [ [Object] ],
+  //     available_markets: [
+  //       'AR', 'AU', 'AT', 'BE', 'BO', 'BR', 'BG', 'CA', 'CL', 'CO',
+  //       'CR', 'CY', 'CZ', 'DK', 'DO', 'DE', 'EC', 'EE', 'SV', 'FI',
+  //       'FR', 'GR', 'GT', 'HN', 'HK', 'HU', 'IS', 'IE', 'IT', 'LV',
+  //       'LT', 'LU', 'MY', 'MT', 'MX', 'NL', 'NZ', 'NI', 'NO', 'PA',
+  //       'PY', 'PE', 'PH', 'PL', 'PT', 'SG', 'SK', 'ES', 'SE', 'CH',
+  //       'TW', 'TR', 'UY', 'US', 'GB', 'AD', 'LI', 'MC', 'ID', 'JP',
+  //       'TH', 'VN', 'RO', 'IL', 'ZA', 'SA', 'AE', 'BH', 'QA', 'OM',
+  //       'KW', 'EG', 'MA', 'DZ', 'TN', 'LB', 'JO', 'PS', 'IN', 'BY',
+  //       'KZ', 'MD', 'UA', 'AL', 'BA', 'HR', 'ME', 'MK', 'RS', 'SI',
+  //       'KR', 'BD', 'PK', 'LK', 'GH', 'KE', 'NG', 'TZ', 'UG', 'AG',
+  //       ... 85 more items
+  //     ],
+  //     external_urls: {
+  //       spotify: 'https://open.spotify.com/album/0rHXUdJb3E01dEBIkZwX6m'
+  //     },
+  //     href: 'https://api.spotify.com/v1/albums/0rHXUdJb3E01dEBIkZwX6m',
+  //     id: '0rHXUdJb3E01dEBIkZwX6m',
+  //     images: [ [Object], [Object], [Object] ],
+  //     is_playable: true,
+  //     name: 'Pure Imagination (Lofi)',
+  //     release_date: '2022-04-06',
+  //     release_date_precision: 'day',
+  //     total_tracks: 1,
+  //     type: 'album',
+  //     uri: 'spotify:album:0rHXUdJb3E01dEBIkZwX6m'
+  //   },
+  //   artists: [
+  //     {
+  //       external_urls: [Object],
+  //       href: 'https://api.spotify.com/v1/artists/0C7tVaY5qlP5YgYh7DSUoJ',
+  //       id: '0C7tVaY5qlP5YgYh7DSUoJ',
+  //       name: 'G Sounds',
+  //       type: 'artist',
+  //       uri: 'spotify:artist:0C7tVaY5qlP5YgYh7DSUoJ'
+  //     }
+  //   ],
+  //   available_markets: [
+  //     'AR', 'AU', 'AT', 'BE', 'BO', 'BR', 'BG', 'CA', 'CL', 'CO',
+  //     'CR', 'CY', 'CZ', 'DK', 'DO', 'DE', 'EC', 'EE', 'SV', 'FI',
+  //     'FR', 'GR', 'GT', 'HN', 'HK', 'HU', 'IS', 'IE', 'IT', 'LV',
+  //     'LT', 'LU', 'MY', 'MT', 'MX', 'NL', 'NZ', 'NI', 'NO', 'PA',
+  //     'PY', 'PE', 'PH', 'PL', 'PT', 'SG', 'SK', 'ES', 'SE', 'CH',
+  //     'TW', 'TR', 'UY', 'US', 'GB', 'AD', 'LI', 'MC', 'ID', 'JP',
+  //     'TH', 'VN', 'RO', 'IL', 'ZA', 'SA', 'AE', 'BH', 'QA', 'OM',
+  //     'KW', 'EG', 'MA', 'DZ', 'TN', 'LB', 'JO', 'PS', 'IN', 'BY',
+  //     'KZ', 'MD', 'UA', 'AL', 'BA', 'HR', 'ME', 'MK', 'RS', 'SI',
+  //     'KR', 'BD', 'PK', 'LK', 'GH', 'KE', 'NG', 'TZ', 'UG', 'AG',
+  //     ... 85 more items
+  //   ],
+  //   disc_number: 1,
+  //   duration_ms: 65619,
+  //   explicit: false,
+  //   external_ids: { isrc: 'QZHN32227729' },
+  //   external_urls: { spotify: 'https://open.spotify.com/track/2PkaitJg8kFOdLTtrEFGyM' },
+  //   href: 'https://api.spotify.com/v1/tracks/2PkaitJg8kFOdLTtrEFGyM',
+  //   id: '2PkaitJg8kFOdLTtrEFGyM',
+  //   is_local: false,
+  //   is_playable: true,
+  //   name: 'Pure Imagination (Lofi)',
+  //   popularity: 55,
+  //   preview_url: null,
+  //   track_number: 1,
+  //   type: 'track',
+  //   uri: 'spotify:track:2PkaitJg8kFOdLTtrEFGyM'
+  // }
+    // console.log('Music API response:', response.data.headers);
     res.json({
         success: true,
+        totalItems: 12 * 20,
         music: response.data.results.map(track => ({
           _id: track.id,
           title: track.name,
@@ -63,6 +123,20 @@ router.get('/search', optionalAuth, async (req, res) => {
           trending: track.trending || false,
           featured: track.featured || false,
           tags: track.tags || []
+          // _id: track.id,
+          // title: track.name,
+          // artist: track.artists[0].name,
+          // genre: track.album ? track.album.name : 'unknown',
+          // duration: track.duration_ms,
+          // audioUrl: track.preview_url || null,
+          // statistics: {
+          //   playCount: track.popularity || 0,
+          //   averageScore: 0 // Placeholder, as Spotify doesn't provide this
+          // },
+          // trending: false, // Placeholder, as Spotify doesn't provide this
+          // featured: false, // Placeholder, as Spotify doesn't provide this
+          // tags: track.available_markets || []
+        
         }))
     })
     
@@ -130,6 +204,11 @@ router.get('/search', optionalAuth, async (req, res) => {
     });
   }
 });
+// {
+//   "access_token": "BQBAAmK3xFTeFDcmT9Mo0Z-0YNFteKMcvkmE4e_pfWiG4tUL10zoOJraNWoIpZcSFZQS9l382Xsc_XUlZUgAxxtviaSkSMOeIm4qQpA_uf_yVUbzC_q2dP3UyO-gyT9myqTMLL8qDT0",
+//   "token_type": "Bearer",
+//   "expires_in": 3600
+// }
 
 // @route   GET /api/music/:id
 // @desc    Get music details
@@ -184,6 +263,12 @@ router.get('/:id', optionalAuth, async (req, res) => {
     // });
     // https://api.jamendo.com/v3.0/tracks?client_id=86025b4a&id=169
     const response = await axios.get(`${process.env.MUSIC_API_URL}/tracks?client_id=${process.env.MUSIC_API_KEY}&id=${id}`);
+    // const accessToken = process.env.MUSIC_API_ACCESS_TOKEN;
+    // const response = await axios.get(`${process.env.MUSIC_API_URL}/tracks/${id}`, {
+    //   headers: {
+    //     Authorization: `Bearer ${accessToken}`
+    //   }
+    // });
     console.log('Music API response:', response.data);
     if (!response.data || !response.data.results || response.data.results.length === 0) {
       return res.status(404).json({
@@ -208,6 +293,20 @@ router.get('/:id', optionalAuth, async (req, res) => {
         trending: track.trending || false,
         featured: track.featured || false,
         tags: track.tags || []
+        // _id: track.id,
+        //   title: track.name,
+        //   artist: track.artists[0].name,
+        //   genre: track.album ? track.album.name : 'unknown',
+        //   duration: track.duration_ms,
+        //   audioUrl: track.uri || null,
+        //   statistics: {
+        //     playCount: track.popularity || 0,
+        //     averageScore: 0 // Placeholder, as Spotify doesn't provide this
+        //   },
+        //   trending: false, // Placeholder, as Spotify doesn't provide this
+        //   featured: false, // Placeholder, as Spotify doesn't provide this
+        //   tags: track.available_markets || []
+       
       }
     });
 
