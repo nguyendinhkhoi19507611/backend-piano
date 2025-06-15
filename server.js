@@ -100,6 +100,14 @@ app.get('/health', (req, res) => {
     version: '1.0.0'
   });
 });
+app.get('/proxy-audio', async (req, res) => {
+  const url = req.query.url;
+  const response = await fetch(url);
+  const buffer = await response.arrayBuffer();
+  
+  res.set('Content-Type', 'audio/mpeg');
+  res.send(Buffer.from(buffer));
+});
 
 // API Routes
 app.use('/api/auth', require('./routes/auth'));

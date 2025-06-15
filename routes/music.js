@@ -3,6 +3,7 @@ const express = require('express');
 const { authenticateToken, optionalAuth, requirePremium } = require('../middleware/auth');
 const Music = require('../models/Music');
 const User = require('../models/User');
+const axios = require('axios');
 
 const router = express.Router();
 
@@ -22,62 +23,104 @@ router.get('/search', optionalAuth, async (req, res) => {
 
     // Build search filters
     const filters = { status: 'published' };
-    
-    if (genre) filters.genre = genre;
-    if (difficulty) filters['difficulty.level'] = difficulty;
-    
-    // If user not premium, exclude premium songs
-    if (!req.user || !req.user.subscriptions.premium.active) {
-      filters['availability.premium'] = false;
-    }
-
-    // Search query
-    let searchResults;
-    if (q) {
-      searchResults = await Music.search(q, filters);
-    } else {
-      let sortQuery = {};
-      switch (sort) {
-        case 'popularity':
-          sortQuery = { 'statistics.playCount': -1 };
-          break;
-        case 'newest':
-          sortQuery = { createdAt: -1 };
-          break;
-        case 'difficulty':
-          sortQuery = { 'difficulty.rating': 1 };
-          break;
-        case 'duration':
-          sortQuery = { duration: 1 };
-          break;
-        default:
-          sortQuery = { 'statistics.playCount': -1 };
-      }
-
-      searchResults = await Music.find(filters)
-        .sort(sortQuery)
-        .limit(parseInt(limit))
-        .skip((parseInt(page) - 1) * parseInt(limit));
-    }
-
-    const total = await Music.countDocuments(filters);
-
+    const response = await axios.get(`${process.env.MUSIC_API_URL}/tracks/?client_id=${process.env.MUSIC_API_KEY}&format=json&limit=${limit}`);
+    console.log('Music API response:', response.data);
+    // tracks: response.data.results.map(track => ({
+    //  {
+    //   id: '168',
+    //   name: "J'm'e FPM",
+    //   duration: 183,
+    //   artist_id: '7',
+    //   artist_name: 'TriFace',
+    //   artist_idstr: 'triface',
+    //   album_name: 'Premiers Jets',
+    //   album_id: '24',
+    //   license_ccurl: '',
+    //   position: 1,
+    //   releasedate: '2004-12-17',
+    //   album_image: 'https://usercontent.jamendo.com?type=album&id=24&width=300&trackid=168',
+    //   audio: 'https://prod-1.storage.jamendo.com/?trackid=168&format=mp31&from=M6lbJk0IPDSiuWRYj2J54A%3D%3D%7CuGtSmpsZJ5Xu5uxtfwEyaQ%3D%3D',
+    //   audiodownload: 'https://prod-1.storage.jamendo.com/download/track/168/mp32/',
+    //   prourl: '',
+    //   shorturl: 'https://jamen.do/t/168',
+    //   shareurl: 'https://www.jamendo.com/track/168',
+    //   audiodownload_allowed: true,
+    //   image: 'https://usercontent.jamendo.com?type=album&id=24&width=300&trackid=168'
+    // },
     res.json({
-      success: true,
-      music: searchResults,
-      pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
-        total,
-        pages: Math.ceil(total / parseInt(limit))
-      },
-      filters: {
-        query: q,
-        genre,
-        difficulty,
-        sort
-      }
-    });
+        success: true,
+        music: response.data.results.map(track => ({
+          _id: track.id,
+          title: track.name,
+          artist: track.artist_name,
+          genre: track.genre || 'unknown',
+          duration: track.duration,
+          audioUrl: track.audio,
+          statistics: {
+            playCount: track.statistics ? track.statistics.playCount : 0,
+            averageScore: track.statistics ? track.statistics.averageScore : 0
+          },
+          trending: track.trending || false,
+          featured: track.featured || false,
+          tags: track.tags || []
+        }))
+    })
+    
+    // if (genre) filters.genre = genre;
+    // if (difficulty) filters['difficulty.level'] = difficulty;
+    
+    // // If user not premium, exclude premium songs
+    // if (!req.user || !req.user.subscriptions.premium.active) {
+    //   filters['availability.premium'] = false;
+    // }
+
+    // // Search query
+    // let searchResults;
+    // if (q) {
+    //   searchResults = await Music.search(q, filters);
+    // } else {
+    //   let sortQuery = {};
+    //   switch (sort) {
+    //     case 'popularity':
+    //       sortQuery = { 'statistics.playCount': -1 };
+    //       break;
+    //     case 'newest':
+    //       sortQuery = { createdAt: -1 };
+    //       break;
+    //     case 'difficulty':
+    //       sortQuery = { 'difficulty.rating': 1 };
+    //       break;
+    //     case 'duration':
+    //       sortQuery = { duration: 1 };
+    //       break;
+    //     default:
+    //       sortQuery = { 'statistics.playCount': -1 };
+    //   }
+
+    //   searchResults = await Music.find(filters)
+    //     .sort(sortQuery)
+    //     .limit(parseInt(limit))
+    //     .skip((parseInt(page) - 1) * parseInt(limit));
+    // }
+
+    // const total = await Music.countDocuments(filters);
+
+    // res.json({
+    //   success: true,
+    //   music: searchResults,
+    //   pagination: {
+    //     page: parseInt(page),
+    //     limit: parseInt(limit),
+    //     total,
+    //     pages: Math.ceil(total / parseInt(limit))
+    //   },
+    //   filters: {
+    //     query: q,
+    //     genre,
+    //     difficulty,
+    //     sort
+    //   }
+    // });
 
   } catch (error) {
     console.error('Music search error:', error);
@@ -95,48 +138,76 @@ router.get('/:id', optionalAuth, async (req, res) => {
   try {
     const { id } = req.params;
 
-    const music = await Music.findById(id);
+    // const music = await Music.findById(id);
     
-    if (!music || music.status !== 'published') {
+    // if (!music || music.status !== 'published') {
+    //   return res.status(404).json({
+    //     success: false,
+    //     message: 'Music not found'
+    //   });
+    // }
+
+    // // Check premium access
+    // if (music.availability.premium && (!req.user || !req.user.subscriptions.premium.active)) {
+    //   return res.status(403).json({
+    //     success: false,
+    //     message: 'Premium subscription required',
+    //     premium: true
+    //   });
+    // }
+
+    // // Get user's best score for this music
+    // let userBestScore = null;
+    // if (req.user) {
+    //   const Game = require('../models/Game');
+    //   const bestGame = await Game.findOne({
+    //     userId: req.user._id,
+    //     musicId: id,
+    //     'session.status': 'completed'
+    //   }).sort({ 'scoring.totalScore': -1 });
+      
+    //   if (bestGame) {
+    //     userBestScore = {
+    //       score: bestGame.scoring.totalScore,
+    //       accuracy: bestGame.gameplay.accuracy,
+    //       achievedAt: bestGame.createdAt
+    //     };
+    //   }
+    // }
+
+    // res.json({
+    //   success: true,
+    //   music: {
+    //     ...music.toObject(),
+    //     userBestScore
+    //   }
+    // });
+    // https://api.jamendo.com/v3.0/tracks?client_id=86025b4a&id=169
+    const response = await axios.get(`${process.env.MUSIC_API_URL}/tracks?client_id=${process.env.MUSIC_API_KEY}&id=${id}`);
+    console.log('Music API response:', response.data);
+    if (!response.data || !response.data.results || response.data.results.length === 0) {
       return res.status(404).json({
         success: false,
         message: 'Music not found'
       });
     }
-
-    // Check premium access
-    if (music.availability.premium && (!req.user || !req.user.subscriptions.premium.active)) {
-      return res.status(403).json({
-        success: false,
-        message: 'Premium subscription required',
-        premium: true
-      });
-    }
-
-    // Get user's best score for this music
-    let userBestScore = null;
-    if (req.user) {
-      const Game = require('../models/Game');
-      const bestGame = await Game.findOne({
-        userId: req.user._id,
-        musicId: id,
-        'session.status': 'completed'
-      }).sort({ 'scoring.totalScore': -1 });
-      
-      if (bestGame) {
-        userBestScore = {
-          score: bestGame.scoring.totalScore,
-          accuracy: bestGame.gameplay.accuracy,
-          achievedAt: bestGame.createdAt
-        };
-      }
-    }
-
+    const track = response.data.results[0];
     res.json({
       success: true,
       music: {
-        ...music.toObject(),
-        userBestScore
+        _id: track.id,
+        title: track.name,
+        artist: track.artist_name,
+        genre: track.genre || 'unknown',
+        duration: track.duration,
+        audioUrl: track.audiodownload,
+        statistics: {
+          playCount: track.statistics ? track.statistics.playCount : 0,
+          averageScore: track.statistics ? track.statistics.averageScore : 0
+        },
+        trending: track.trending || false,
+        featured: track.featured || false,
+        tags: track.tags || []
       }
     });
 
