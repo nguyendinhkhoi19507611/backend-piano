@@ -77,6 +77,11 @@ const userSchema = new mongoose.Schema({
       type: Number,
       default: 0,
       min: 0
+    },
+    accuracy: {
+      type: Number,
+      default: 0,
+      min: 0
     }
   },
   preferences: {
@@ -151,6 +156,10 @@ const userSchema = new mongoose.Schema({
       enum: ['metamask', 'trust_wallet', 'coinbase_wallet']
     },
     connectedAt: Date
+  },
+  isShowAds: {
+      type: Boolean,
+      default: true
   },
   security: {
     lastLogin: Date,

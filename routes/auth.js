@@ -200,7 +200,18 @@ router.post('/login', authLimiter, async (req, res) => {
         coins: user.coins,
         preferences: user.preferences,
         kycStatus: user.kyc.status,
-        premiumActive: user.subscriptions.premium.active
+        premiumActive: user.subscriptions.premium.active,
+        isShowAds: user.isShowAds,
+        statistics: {
+          totalGames: user.statistics.totalGames,
+          totalScore: user.statistics.totalScore,
+          bestScore: user.statistics.bestScore,
+          totalPlayTime: user.statistics.totalPlayTime,
+          favoriteGenre: user.statistics.favoriteGenre,
+          level: user.statistics.level,
+          experience: user.statistics.experience,
+          accuracy: user.statistics.accuracy
+        }
       }
     });
 
@@ -259,7 +270,7 @@ router.get('/me', authenticateToken, async (req, res) => {
 // @access  Private
 router.put('/profile', authenticateToken, async (req, res) => {
   try {
-    const { username, preferences, personalInfo } = req.body;
+    const { username, preferences, personalInfo, coins, statistics } = req.body;
     const user = await User.findById(req.user._id);
 
     // Update username if provided and available
@@ -283,6 +294,66 @@ router.put('/profile', authenticateToken, async (req, res) => {
       if (typeof preferences.autoPlay === 'boolean') user.preferences.autoPlay = preferences.autoPlay;
     }
 
+    // update coins 
+    if (coins) {
+      if (typeof coins.total === 'number' && coins.total >= 0) {
+        user.coins.total = coins.total;
+      }
+      if (typeof coins.available === 'number' && coins.available >= 0) {
+        user.coins.available = coins.available;
+      }
+      if (typeof coins.pending === 'number' && coins.pending >= 0) {
+        user.coins.pending = coins.pending;
+      }
+    }
+// statistics: {
+//     totalGames: {
+//       type: Number,
+//       default: 0
+//     },
+//     totalScore: {
+//       type: Number,
+//       default: 0
+//     },
+//     bestScore: {
+//       type: Number,
+//       default: 0
+//     },
+//     totalPlayTime: {
+//       type: Number,
+//       default: 0 // Tính bằng phút
+//     },
+//     favoriteGenre: {
+//       type: String,
+//       default: null
+//     },
+//     level: {
+//       type: Number,
+//       default: 1,
+//       min: 1
+//     },
+//     experience: {
+//       type: Number,
+//       default: 0,
+//       min: 0
+//     }
+//   },
+    // Update statistics
+    if (statistics) {
+      if (typeof statistics.totalGames === 'number' && statistics.totalGames >= 0) {
+        user.statistics.totalGames = statistics.totalGames;
+      }
+      if (typeof statistics.experience === 'number' && statistics.experience >= 0) {
+        user.statistics.experience = statistics.experience;
+      }
+      if (typeof statistics.bestScore === 'number' && statistics.bestScore >= 0) {
+        user.statistics.bestScore = statistics.bestScore;
+      }
+      if (typeof statistics.accuracy === 'number' && statistics.accuracy >= 0) {
+        user.statistics.accuracy = statistics.accuracy;
+      }
+    }
+
     // Update personal info for KYC
     if (personalInfo && user.kyc.status === 'not_submitted') {
       user.kyc.personalInfo = {
@@ -301,7 +372,8 @@ router.put('/profile', authenticateToken, async (req, res) => {
         username: user.username,
         email: user.email,
         preferences: user.preferences,
-        kycStatus: user.kyc.status
+        kycStatus: user.kyc.status,
+        coins: user.coins,
       }
     });
 
