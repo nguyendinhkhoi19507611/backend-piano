@@ -1,6 +1,7 @@
 
 const express = require('express');
 const bcrypt = require('bcryptjs');
+const crypto = require("crypto");
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { authenticateToken, generateToken, refreshToken, logout } = require('../middleware/auth');
@@ -270,6 +271,8 @@ router.get('/me', authenticateToken, async (req, res) => {
 // @access  Private
 router.put('/profile', authenticateToken, async (req, res) => {
   try {
+    // giải mã req.body with key
+      
     const { username, preferences, personalInfo, coins, statistics } = req.body;
     const user = await User.findById(req.user._id);
 
