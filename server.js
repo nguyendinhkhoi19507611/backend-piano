@@ -114,6 +114,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/game', require('./routes/game'));
 app.use('/api/music', require('./routes/music'));
 app.use('/api/payment', require('./routes/payment'));
+app.use('/api/spotify', require('./routes/spotify'));
 
 // Socket.IO setup for real-time game features
 const http = require('http');
